@@ -50,8 +50,30 @@
                 </tr>
             </table>
             <div class="submit" style="text-align:center">
-                <button v-on:click="addcart()">加入購物車</button>
-                <button v-on:click="emptycart()">清空購物車</button>
+                <button v-on:click="addcart()" class="btn btn-primary" style="font-weight:bold;">加入購物車</button>
+                <button v-on:click="emptycart()" class="btn btn-warning" style="font-weight:bold;">清空購物車</button>
+            </div>
+            <div class="cart" style="margin-top:30px;">
+                <table>
+                    <tr>
+                        <th>編號</th>
+                        <th>產品名稱</th>
+                        <th>價格</th>
+                        <th>來源</th>
+                        <th>數量</th>
+                        <th>總價</th>
+                        <th></th>
+                    </tr>
+                    <tr v-for="item in cart" :key="item.id">
+                        <td class="id">{{item.id}}</td>
+                        <td class="name">{{item.name}}</td>
+                        <td class="price">{{item.price}}</td>
+                        <td class="source">{{item.source}}</td>
+                        <td class="number">{{item.count}}</td>
+                        <td class="total">{{item.total}}</td>
+                        <td><button class="delete" v-on:click="delete()"></button></td>
+                    </tr>
+                </table>
             </div>
         </div>
     </body>
@@ -142,6 +164,9 @@
                 }, emptycart: function () {
                     this.cart = [];
                     console.log(JSON.stringify(this.cart));
+                },
+                delete: function () {
+
                 }
 
 
