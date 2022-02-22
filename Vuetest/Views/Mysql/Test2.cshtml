@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html >
+<head>
+    <meta charset="utf-8" />
+    <title>購物車測試</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+</head>
+    <style>
+        table {
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: bold;
+        }
+        th{
+            text-align:center;
+            color:brown;
+            width:70px;
+        }
+        td{
+            text-align:center;
+        }
+        .add,.minus{
+            cursor:pointer;
+        }
+    </style>
+    <body>
+        <div id="app">
+            <table>
+                <tr>
+                    <th>編號</th>
+                    <th>產品名稱</th>
+                    <th>價格</th>
+                    <th>來源</th>
+                    <th>數量</th>
+                    <th>總價</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                <tr v-for="item in itemlist" :key="item.id">
+                    <td class="id">{{item.id}}</td>
+                    <td class="name">{{item.name}}</td>
+                    <td class="price">{{item.price}}</td>
+                    <td class="source">{{item.source}}</td>
+                    <td class="number">{{item.count}}</td>
+                    <td class="total">{{item.total}}</td>
+                    <td><button class="add" v-on:click="add(item.id)">+</button></td>
+                    <td><button class="minus" v-on:click="reduce(item.id)">-</button></td>
+                </tr>
+            </table>
+            <div class="submit" style="text-align:center">
+                <button v-on:click="addcart()">加入購物車</button>
+                <button v-on:click="emptycart()">清空購物車</button>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript">
+        var app = new Vue({
+            el: "#app",
+            data: {
+                itemlist: [{
+                    id: 1,
+                    name: "蘋果",
+                    productID:"apple001",
+                    price: 80,
+                    source: "日本",
+                    count: 0,
+                    total: 0
+                }, {
+                    id: 2,
+                    name: "香蕉",
+                    productID:"banana002",
+                    price: 40,
+                    source: "台灣",
+                    count: 0,
+                    total: 0
+                }, {
+                    id: 3,
+                    name: "檸檬",
+                    productID:"lemon003",
+                    price: 60,
+                    source: "美國",
+                    count: 0,
+                    total: 0
+                }, {
+                    id: 4,
+                    name: "楓糖",
+                    productID:"maple004",
+                    price: 300,
+                    source: "加拿大",
+                    count: 0,
+                    total: 0
+                }],
+                cart:[]
+            }, methods: {
+                add: function (id) {
+                    this.itemlist[id - 1].count++;
+                    this.itemlist[id - 1].total = this.itemlist[id - 1].total + this.itemlist[id - 1].price;
+                },
+                reduce: function (id) {
+                    var target = this.itemlist[id - 1].count;
+                    if (target > 0) {
+                        this.itemlist[id - 1].count--;
+                        this.itemlist[id - 1].total = this.itemlist[id - 1].total - this.itemlist[id - 1].price;
+                    }
+                   
+
+                }, addcart: function () {
+                    //console.log(JSON.stringify(this.itemlist));
+                    for (var i = 0; i < this.itemlist.length; i++) {
+                        if (this.itemlist[i].count !== 0) {
+                            if (this.cart.length != 0) {//當購物車裡面沒有東西
+                                var check = false;
+                                for (var j = 0; j < this.cart.length; j++) {//一個一個去比對
+                                    if (this.cart[j].productID == this.itemlist[i].productID) {
+                                        this.cart[j].count += this.itemlist[i].count;
+                                        this.cart[j].total += this.itemlist[i].total;
+                                        check = true;
+                                        //console.log(this.cart.length);
+                                        //console.log(this.itemlist[i].id);
+                                    }
+                                }
+                                if (!check) {
+                                    this.cart.push({ ...this.itemlist[i] });//字典複製
+                                    console.log("222");
+                                }
+                                
+                            } else {
+                                this.cart.push({ ...this.itemlist[i] });//字典複製
+                                console.log("333");
+                            }
+
+                            
+                        }
+
+                        this.itemlist[i].count = 0;
+                        this.itemlist[i].total = 0;
+                    }
+                    console.log(JSON.stringify(this.cart));
+
+                }, emptycart: function () {
+                    this.cart = [];
+                    console.log(JSON.stringify(this.cart));
+                }
+
+
+            }
+
+
+
+        });
+
+
+
+
+
+    </script>
+</html>

@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+</head>
+<style>
+    table {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    th {
+        width: 70px;
+        color: brown;
+        text-align:center
+    }
+</style>
+<body>
+    <div id="app">
+        <div class="nickname">
+            <label>綽號:</label>
+            <input type="text" id="nickname" placeholder="nickname">
+        </div>
+        <div class="name">
+            <label>代號:</label>
+            <input type="text" id="name" placeholder="name">
+        </div>
+        <button v-on:click="addpeople()" class="btn btn-primary">添加</button>
+        <button v-on:click="showdata()"  class="btn btn-primary">顯示</button>
+        <form class="form" action="Test1_output" method="post">
+            <input type="hidden" value="" id="hiddenbox" name="list" />
+            <input type="submit" name="submit" value="提交" class="btn btn-warning"/>
+        </form>
+        <hr />
+
+        <table cellspacing="10" style="margin-left:auto;margin-right:auto;">
+            <tr>
+                <th>編號</th>
+                <th>綽號</th>
+                <th>代號</th>
+                <th></th>
+            </tr>
+            <tr v-for="item in itemlist" :key="item.id">
+                <td class="id">{{item.id}}</td>
+                <td class="nickname">{{item.nickname}}</td>
+                <td class="name">{{item.name}}</td>
+                <td class="delete"><button class="delete" v-on:click="deletedata(item.id)">刪除</button></td>
+            </tr>
+
+        </table>
+
+
+
+    </div>
+
+</body>
+<script type="text/javascript">
+    var get_id=3;
+
+    var data=new Vue({
+            el:"#app",
+            data:{
+                itemlist:[{
+                    id:1,
+                    nickname:'殺手劍士',
+                    name:'安哥'
+                },{
+                    id:2,
+                    nickname:'紅心劍士',
+                    name:'筠斯'
+                }]
+
+            },methods:{
+                addpeople:function(){
+                    var get_nickname=document.getElementById("nickname").value;
+                    var get_name=document.getElementById("name").value;
+
+                    if(get_nickname!=""&&get_name!=""){
+                        var obj=new Object;
+                        obj.id=get_id;
+                        obj.nickname=get_nickname;
+                        obj.name=get_name;
+
+
+                        this.itemlist.push(obj);
+
+                        console.log("Success added!!");
+
+                        get_id++;
+                        document.getElementById("nickname").value="";
+                        document.getElementById("name").value="";
+                    }else{
+                        alert("輸入值不可以為空!!");
+                    }
+
+                    document.getElementById("hiddenbox").value=JSON.stringify(this.itemlist);
+                    console.log("data updated");
+
+
+                },
+                showdata:function(){
+                    console.log(JSON.stringify(this.itemlist));
+                },
+                deletedata: function (id) {
+                    for (var i = 0; i < this.itemlist.length; i++) {
+                        if (i === id-1) {
+                            this.itemlist.splice(i, 1);
+                            
+                        }
+                    }
+
+
+                    for (var i = 0; i < this.itemlist.length; i++) {
+                        if (this.itemlist[i].id !== i + 1) {
+                            this.itemlist[i].id = i + 1;
+                        }
+                    }
+                    console.log(JSON.stringify(this.itemlist));
+                    
+
+
+                }
+            }
+    });
+
+
+
+   
+
+
+
+
+
+
+        //同步更新 可以先用Session 再一併上傳
+</script>
+
+</html>
+
+
