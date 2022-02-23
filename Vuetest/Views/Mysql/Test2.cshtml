@@ -71,7 +71,7 @@
                         <td class="source">{{item.source}}</td>
                         <td class="number">{{item.count}}</td>
                         <td class="total">{{item.total}}</td>
-                        <td><button class="delete" v-on:click="delete()"></button></td>
+                        <td><button v-on:click="deleteitem(item.id)">刪除</button></td>
                     </tr>
                 </table>
             </div>
@@ -165,8 +165,13 @@
                     this.cart = [];
                     console.log(JSON.stringify(this.cart));
                 },
-                delete: function (id) {
-
+                deleteitem: function (id) {
+                    for (var i = 0; i < this.cart.length; i++) {
+                        if (this.cart[i].id == id) {
+                            this.cart.splice(i, 1);
+                            break;
+                        }
+                    }
                 }
 
 
