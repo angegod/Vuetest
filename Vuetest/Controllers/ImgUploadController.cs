@@ -4,13 +4,24 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using MySql.Data.MySqlClient;
+using System.Data.SqlClient;
 using System.Data.SqlTypes;
+using System.Data;
+using Vuetest.Models;
+using System.Drawing;
+using System.Text;
+using System.ComponentModel;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Microsoft.Ajax.Utilities;
+using System.Text.RegularExpressions;
 
 namespace Vuetest.Controllers
 {
     public class ImgUploadController : Controller
     {
+
+        
         // GET: ImgUpload
         public ActionResult Index()
         {
@@ -24,42 +35,108 @@ namespace Vuetest.Controllers
 
 
         [HttpPost]
-        public ActionResult Upload(HttpPostedFileBase File)
+        public ActionResult Upload()
         {
-            if (File != null && File.ContentLength > 0)
+            //Byte[] bytes = null;
+            HttpPostedFileBase file = Request.Files["File"];
+            
+            Stream fs = file.InputStream;
+
+            BinaryReader br = new BinaryReader(fs);
+            byte[] imgarray = new byte[(int)fs.Length];
+            file.InputStream.Read(imgarray, 0, (int)fs.Length);
+
+
+            string conn = "Server=TR\\SQLEXPRESS;Database=Imgtext;uid=ange;pwd=ange0909;Trusted_Connection=True;MultipleActiveResultSets=True;";
+            string insert = "insert into storage (ImageName,Image) values (@ImageName,@Image);";
+            SqlConnection mycon = new SqlConnection(conn);
+            SqlCommand cmd = new SqlCommand(insert,mycon);
+            cmd.Parameters.Add("@ImageName", SqlDbType.VarChar, 200).Value = "Testname";
+            cmd.Parameters.Add("@Image", SqlDbType.Image).Value = imgarray;
+            
+
+            mycon.Open();
+            cmd.ExecuteNonQuery();
+            mycon.Close();
+
+            return RedirectToAction("Showimg");
+        }
+
+        public ActionResult ShowImg()
+        {
+            string conn = "Server=TR\\SQLEXPRESS;Database=Imgtext;uid=ange;pwd=ange0909;Trusted_Connection=True;MultipleActiveResultSets=True;";
+
+            string search = "select * from storage";
+            SqlConnection mycon = new SqlConnection(conn);
+            SqlCommand cmd = new SqlCommand(search, mycon);
+            mycon.Open();
+
+            SqlDataReader mydr = cmd.ExecuteReader();
+            List<ShowImage> list1 = new List<ShowImage>();
+
+            while (mydr.HasRows)
             {
-                //存到資料夾
-                //var FileName = Path.GetFileName(File.FileName);
-                //var FilePath = Path.Combine(Server.MapPath("~/Images/"), FileName);
-                //File.SaveAs(FilePath);
-
-
-                //轉成byte 方法一 直接轉
-                byte[] FileBytes;
-                using (MemoryStream ms = new MemoryStream())
+                while (mydr.Read())
                 {
-                    File.InputStream.CopyTo(ms);
-                    FileBytes = ms.GetBuffer();
+                    //Image oImage;
+                    //Bitmap oBitmap;
+
+                    string ImgaeName = mydr.GetString(1);
+                    byte[] imagearray = (byte[])mydr[2];
+
+                    TypeConverter tc = TypeDescriptor.GetConverter(typeof(Bitmap));
+                    Bitmap MyBitmap = (Bitmap)tc.ConvertFrom(imagearray);
+
+                    string imgString = Convert.ToBase64String(imagearray);
+                    
+
+
+                    list1.Add(new ShowImage(ImgaeName,imgString));
+
+
                 }
-
-                string conn = "server=localhost;port=3306;user=root;password=ange0909;database=vuetest;";
-                string insert = "insert into imgtext (img) values(@img)";
-                MySqlConnection mycon = new MySqlConnection(conn);
-                MySqlCommand cmd = new MySqlCommand(insert, mycon);
-
-                cmd.Parameters.AddWithValue("@img", FileBytes);
-
-                mycon.Open();
-                cmd.ExecuteNonQuery();
-                mycon.Close();
-
-                TempData["Data"] = FileBytes;
-
+                mydr.NextResult();
             }
-
-
-
+            mycon.Close();
+            if (ViewBag.imglist==null)
+            {
+                //ViewBag.imglist = list1;
+                ViewBag.imglist = Session["imglist1"];
+            }
+            
+            
             return View();
         }
+
+        public ActionResult GetImgdata()
+        {
+            string data= Getting();
+            Session["test1"] = data;
+            data = data.TrimStart('"');
+            data = data.TrimEnd('"');
+            data=data.Replace(@"\", "");
+
+
+            List<ShowImage> list1 = JsonConvert.DeserializeObject<List<ShowImage>>(data);
+
+            Session["imglist1"] = list1;
+            Session["test"] = data;
+;
+            return RedirectToAction("ShowImg");
+        }
+
+        public string Getting()
+        {
+            var client = new HttpClient();
+
+            var Response = client.GetAsync("https://localhost:44310/api/Imgreturn/ReturnValue").Result;
+
+            string returnvalue =  Response.Content.ReadAsStringAsync().Result;
+
+            
+
+            return returnvalue;
+        }
+
     }
 }
