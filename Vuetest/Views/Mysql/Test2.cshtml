@@ -25,6 +25,12 @@
             cursor:pointer;
         }
     </style>
+    @{          
+        if (Session["list"] != null)
+            {
+                <script>alert(@Session["list"].ToString());</script>
+            }
+     }
     <body>
         <div id="app">
             <table>
@@ -52,6 +58,7 @@
             <div class="submit" style="text-align:center">
                 <button v-on:click="addcart()" class="btn btn-primary" style="font-weight:bold;">加入購物車</button>
                 <button v-on:click="emptycart()" class="btn btn-warning" style="font-weight:bold;">清空購物車</button>
+                <button v-on:click="submitcart()" class="btn btn-danger" style="font-weight:bold">購物車送出</button>
             </div>
             <div class="cart" style="margin-top:30px;">
                 <table>
@@ -84,7 +91,7 @@
                 itemlist: [{
                     id: 1,
                     name: "蘋果",
-                    productID:"apple001",
+                    productID: "apple001",
                     price: 80,
                     source: "日本",
                     count: 0,
@@ -92,7 +99,7 @@
                 }, {
                     id: 2,
                     name: "香蕉",
-                    productID:"banana002",
+                    productID: "banana002",
                     price: 40,
                     source: "台灣",
                     count: 0,
@@ -100,7 +107,7 @@
                 }, {
                     id: 3,
                     name: "檸檬",
-                    productID:"lemon003",
+                    productID: "lemon003",
                     price: 60,
                     source: "美國",
                     count: 0,
@@ -108,7 +115,7 @@
                 }, {
                     id: 4,
                     name: "楓糖",
-                    productID:"maple004",
+                    productID: "maple004",
                     price: 300,
                     source: "加拿大",
                     count: 0,
@@ -126,7 +133,7 @@
                         this.itemlist[id - 1].count--;
                         this.itemlist[id - 1].total = this.itemlist[id - 1].total - this.itemlist[id - 1].price;
                     }
-                   
+
 
                 }, addcart: function () {
                     //console.log(JSON.stringify(this.itemlist));
@@ -145,15 +152,15 @@
                                 }
                                 if (!check) {
                                     this.cart.push({ ...this.itemlist[i] });//字典複製
-                                    console.log("222");
+                                    //console.log("222");
                                 }
-                                
+
                             } else {
                                 this.cart.push({ ...this.itemlist[i] });//字典複製
-                                console.log("333");
+                                //console.log("333");
                             }
 
-                            
+
                         }
 
                         this.itemlist[i].count = 0;
@@ -172,6 +179,36 @@
                             break;
                         }
                     }
+                }, submitcart: function () {
+                    var senddata = this.itemlist;
+                    //var rootPath = '@Url.Content("~/")';
+                    $.ajax({
+                        type: 'POST',
+
+                        //這是傳遞單一參數的方式
+                        //url: rootPath + 'Mysql/Test2_output?caseId',
+
+                        //這是傳遞整個物件的方式1
+                        url: '@Url.Action("Test2_output","Mysql")',
+                        data: JSON.stringify(this.cart),
+                        contentType: "application/json; charset=utf-8;",
+                        //dataType: "json",
+
+                        //這是回傳多筆JSON資料的情況
+                        success: function (data) {
+                            console.log("success");
+                        },
+
+                        //這是回傳單筆JSON資料的情況
+                        // success: function (data) {
+                        // $('div.modal-content').unblock();
+                        // alert(data.idno);
+
+                        // },
+                        error: function (error) {
+                            alert(error.responseText);
+                        }
+                    });
                 }
 
 

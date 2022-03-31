@@ -172,14 +172,12 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\ImgUploadController.cs" />
     <Compile Include="Controllers\MysqlController.cs" />
-    <Compile Include="Controllers\ImgreturnController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Booklist.cs" />
     <Compile Include="Models\data.cs" />
-    <Compile Include="Models\ShowImage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -220,8 +218,6 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Mysql\Test1.cshtml" />
     <Content Include="Views\Mysql\Test2.cshtml" />
-    <Content Include="Views\ImgUpload\Test1.cshtml" />
-    <Content Include="Views\ImgUpload\ShowImg.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

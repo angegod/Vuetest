@@ -7,6 +7,8 @@ using MySql.Data.MySqlClient;
 using System.Data.SqlTypes;
 using Newtonsoft.Json;
 using Vuetest.Models;
+using System.Data.SqlClient;
+using System.Data;
 
 
 namespace Vuetest.Controllers
@@ -63,6 +65,34 @@ namespace Vuetest.Controllers
 
           
             return RedirectToAction("Test1");
+        }
+
+        [HttpPost]
+        public ActionResult Test2_output(string list)
+        {
+            Session["list"] = list;
+
+            string conn = "Server=TR\\SQLEXPRESS;Database=Imgtext;uid=ange;pwd=ange0909;Trusted_Connection=True;MultipleActiveResultSets=True;";
+            string insert = "insert into orders (id,userName,orders) values(@id,@userName,@orders)";
+
+            //string order = JsonConvert.SerializeObject(list);
+
+            SqlConnection mycon = new SqlConnection(conn);
+            SqlCommand cmd = new SqlCommand(insert, mycon);
+
+            cmd.Parameters.Add("@id", SqlDbType.Int).Value = 1;
+            cmd.Parameters.Add("@userName", SqlDbType.VarChar, 200).Value = "Ange";
+            cmd.Parameters.Add("@orders", SqlDbType.VarChar).Value = list;
+
+            cmd.CommandType = CommandType.Text;
+
+            mycon.Open();
+
+            cmd.ExecuteReader();
+            mycon.Close();
+
+
+            return RedirectToAction("Tes2");
         }
     }
 }
