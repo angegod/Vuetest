@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html >
+<html>
 <head>
     <meta charset="utf-8" />
     <title>購物車測試</title>
@@ -7,32 +7,58 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
 </head>
-    <style>
-        table {
-            margin-left: auto;
-            margin-right: auto;
-            font-weight: bold;
-        }
-        th{
-            text-align:center;
-            color:brown;
-            width:70px;
-        }
-        td{
-            text-align:center;
-        }
-        .add,.minus{
-            cursor:pointer;
-        }
-    </style>
-    @{          
-        if (Session["list"] != null)
-            {
-                <script>alert(@Session["list"].ToString());</script>
-            }
-     }
-    <body>
-        <div id="app">
+<style>
+    table {
+        margin-left: auto;
+        margin-right: auto;
+        font-weight: bold;
+    }
+
+    th {
+        text-align: center;
+        color: brown;
+        width: 70px;
+    }
+
+    td {
+        text-align: center;
+    }
+
+    .add, .minus {
+        cursor: pointer;
+    }
+</style>
+
+<body>
+    <div id="app">
+        <table>
+            <tr>
+                <th>編號</th>
+                <th>產品名稱</th>
+                <th>價格</th>
+                <th>來源</th>
+                <th>數量</th>
+                <th>總價</th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr v-for="item in itemlist" :key="item.id">
+                <td class="id">{{item.id}}</td>
+                <td class="name">{{item.name}}</td>
+                <td class="price">{{item.price}}</td>
+                <td class="source">{{item.source}}</td>
+                <td class="number">{{item.count}}</td>
+                <td class="total">{{item.total}}</td>
+                <td><button class="add" v-on:click="add(item.id)">+</button></td>
+                <td><button class="minus" v-on:click="reduce(item.id)">-</button></td>
+            </tr>
+        </table>
+        <div class="submit" style="text-align:center">
+            <button v-on:click="addcart()" class="btn btn-primary" style="font-weight:bold;">加入購物車</button>
+            <button v-on:click="emptycart()" class="btn btn-warning" style="font-weight:bold;">清空購物車</button>
+            <button v-on:click="submitcart()" class="btn btn-danger" style="font-weight:bold">購物車送出</button>
+        </div>
+        <div class="cart" style="margin-top:30px;">
             <table>
                 <tr>
                     <th>編號</th>
@@ -42,185 +68,119 @@
                     <th>數量</th>
                     <th>總價</th>
                     <th></th>
-                    <th></th>
                 </tr>
-                <tr v-for="item in itemlist" :key="item.id">
+                <tr v-for="item in cart" :key="item.id">
                     <td class="id">{{item.id}}</td>
                     <td class="name">{{item.name}}</td>
                     <td class="price">{{item.price}}</td>
                     <td class="source">{{item.source}}</td>
                     <td class="number">{{item.count}}</td>
                     <td class="total">{{item.total}}</td>
-                    <td><button class="add" v-on:click="add(item.id)">+</button></td>
-                    <td><button class="minus" v-on:click="reduce(item.id)">-</button></td>
+                    <td><button v-on:click="deleteitem(item.id)">刪除</button></td>
                 </tr>
             </table>
-            <div class="submit" style="text-align:center">
-                <button v-on:click="addcart()" class="btn btn-primary" style="font-weight:bold;">加入購物車</button>
-                <button v-on:click="emptycart()" class="btn btn-warning" style="font-weight:bold;">清空購物車</button>
-                <button v-on:click="submitcart()" class="btn btn-danger" style="font-weight:bold">購物車送出</button>
-            </div>
-            <div class="cart" style="margin-top:30px;">
-                <table>
-                    <tr>
-                        <th>編號</th>
-                        <th>產品名稱</th>
-                        <th>價格</th>
-                        <th>來源</th>
-                        <th>數量</th>
-                        <th>總價</th>
-                        <th></th>
-                    </tr>
-                    <tr v-for="item in cart" :key="item.id">
-                        <td class="id">{{item.id}}</td>
-                        <td class="name">{{item.name}}</td>
-                        <td class="price">{{item.price}}</td>
-                        <td class="source">{{item.source}}</td>
-                        <td class="number">{{item.count}}</td>
-                        <td class="total">{{item.total}}</td>
-                        <td><button v-on:click="deleteitem(item.id)">刪除</button></td>
-                    </tr>
-                </table>
-            </div>
         </div>
-    </body>
-    <script type="text/javascript">
-        var app = new Vue({
-            el: "#app",
-            data: {
-                itemlist: [{
-                    id: 1,
-                    name: "蘋果",
-                    productID: "apple001",
-                    price: 80,
-                    source: "日本",
-                    count: 0,
-                    total: 0
-                }, {
-                    id: 2,
-                    name: "香蕉",
-                    productID: "banana002",
-                    price: 40,
-                    source: "台灣",
-                    count: 0,
-                    total: 0
-                }, {
-                    id: 3,
-                    name: "檸檬",
-                    productID: "lemon003",
-                    price: 60,
-                    source: "美國",
-                    count: 0,
-                    total: 0
-                }, {
-                    id: 4,
-                    name: "楓糖",
-                    productID: "maple004",
-                    price: 300,
-                    source: "加拿大",
-                    count: 0,
-                    total: 0
-                }],
-                cart:[]
-            }, methods: {
-                add: function (id) {
-                    this.itemlist[id - 1].count++;
-                    this.itemlist[id - 1].total = this.itemlist[id - 1].total + this.itemlist[id - 1].price;
-                },
-                reduce: function (id) {
-                    var target = this.itemlist[id - 1].count;
-                    if (target > 0) {
-                        this.itemlist[id - 1].count--;
-                        this.itemlist[id - 1].total = this.itemlist[id - 1].total - this.itemlist[id - 1].price;
-                    }
+        <div class="hidden">
+            <form action="Test2_output" method="post" id="form">
+                <input type="hidden" id="hiddendata" name="list" value="" />
+            </form>
+
+        </div>
+    </div>
+</body>
+@{var getlists = ViewBag.getlist;}
+<script>var lists = []; var counter = 0;</script>        
+@foreach (var i in getlists)
+{
+    <script>console.log("@i.productID")</script>
+    <script>counter++;lists.push({ id:counter,name:"@i.name",productID:"@i.productID",price:@i.price,source:"@i.source",count:@i.count,total:0}); </script>
+}
+<script type="text/javascript">
 
 
-                }, addcart: function () {
-                    //console.log(JSON.stringify(this.itemlist));
-                    for (var i = 0; i < this.itemlist.length; i++) {
-                        if (this.itemlist[i].count !== 0) {
-                            if (this.cart.length != 0) {//當購物車裡面沒有東西
-                                var check = false;
-                                for (var j = 0; j < this.cart.length; j++) {//一個一個去比對
-                                    if (this.cart[j].productID == this.itemlist[i].productID) {
-                                        this.cart[j].count += this.itemlist[i].count;
-                                        this.cart[j].total += this.itemlist[i].total;
-                                        check = true;
-                                        //console.log(this.cart.length);
-                                        //console.log(this.itemlist[i].id);
-                                    }
+    var app = new Vue({
+        el: "#app",
+        data: {
+            itemlist: lists,
+            cart: []
+        }, methods: {
+            add: function (id) {
+                this.itemlist[id - 1].count++;
+                this.itemlist[id - 1].total = this.itemlist[id - 1].total + this.itemlist[id - 1].price;
+            },
+            reduce: function (id) {
+                var target = this.itemlist[id - 1].count;
+                if (target > 0) {
+                    this.itemlist[id - 1].count--;
+                    this.itemlist[id - 1].total = this.itemlist[id - 1].total - this.itemlist[id - 1].price;
+                }
+
+
+            }, addcart: function () {
+                //console.log(JSON.stringify(this.itemlist));
+                for (var i = 0; i < this.itemlist.length; i++) {
+                    if (this.itemlist[i].count !== 0) {
+                        if (this.cart.length != 0) {//當購物車裡面沒有東西
+                            var check = false;
+                            for (var j = 0; j < this.cart.length; j++) {//一個一個去比對
+                                if (this.cart[j].productID == this.itemlist[i].productID) {
+                                    this.cart[j].count += this.itemlist[i].count;
+                                    this.cart[j].total += this.itemlist[i].total;
+                                    check = true;
+                                    //console.log(this.cart.length);
+                                    //console.log(this.itemlist[i].id);
                                 }
-                                if (!check) {
-                                    this.cart.push({ ...this.itemlist[i] });//字典複製
-                                    //console.log("222");
-                                }
-
-                            } else {
+                            }
+                            if (!check) {
                                 this.cart.push({ ...this.itemlist[i] });//字典複製
-                                //console.log("333");
+                                //console.log("222");
                             }
 
-
+                        } else {
+                            this.cart.push({ ...this.itemlist[i] });//字典複製
+                            //console.log("333");
                         }
 
-                        this.itemlist[i].count = 0;
-                        this.itemlist[i].total = 0;
+
                     }
-                    console.log(JSON.stringify(this.cart));
 
-                }, emptycart: function () {
-                    this.cart = [];
-                    console.log(JSON.stringify(this.cart));
-                },
-                deleteitem: function (id) {
-                    for (var i = 0; i < this.cart.length; i++) {
-                        if (this.cart[i].id == id) {
-                            this.cart.splice(i, 1);
-                            break;
-                        }
-                    }
-                }, submitcart: function () {
-                    var senddata = this.itemlist;
-                    //var rootPath = '@Url.Content("~/")';
-                    $.ajax({
-                        type: 'POST',
-
-                        //這是傳遞單一參數的方式
-                        //url: rootPath + 'Mysql/Test2_output?caseId',
-
-                        //這是傳遞整個物件的方式1
-                        url: '@Url.Action("Test2_output","Mysql")',
-                        data: JSON.stringify(this.cart),
-                        contentType: "application/json; charset=utf-8;",
-                        //dataType: "json",
-
-                        //這是回傳多筆JSON資料的情況
-                        success: function (data) {
-                            console.log("success");
-                        },
-
-                        //這是回傳單筆JSON資料的情況
-                        // success: function (data) {
-                        // $('div.modal-content').unblock();
-                        // alert(data.idno);
-
-                        // },
-                        error: function (error) {
-                            alert(error.responseText);
-                        }
-                    });
+                    this.itemlist[i].count = 0;
+                    this.itemlist[i].total = 0;
                 }
+                console.log(JSON.stringify(this.cart));
+
+            }, emptycart: function () {
+                this.cart = [];
+                console.log(JSON.stringify(this.cart));
+            },
+            deleteitem: function (id) {
+                for (var i = 0; i < this.cart.length; i++) {
+                    if (this.cart[i].id == id) {
+                        this.cart.splice(i, 1);
+                        break;
+                    }
+                }
+            }, submitcart: function () {
+                //var senddata = JSON.stringify(this.cart);
+                //document.getElementById("hiddendata").value = senddata;
+                //document.getElementById("form").submit();
+
+                var data = JSON.stringify(this.cart);
+                $.post("/Mysql/Test2_output", { list: data });
 
 
             }
 
 
-
-        });
-
+        }
 
 
 
+    });
 
-    </script>
+
+
+
+
+</script>
 </html>
