@@ -3,9 +3,88 @@
 <head>
     <meta charset="utf-8" />
     <title>購物車測試</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+    <script type="text/javascript">
+
+        var lists = [];
+        var counter = 0;
+        var firsttime = true;
+        var alt_list = [];
+
+
+        $(function () {
+            // Declare a proxy to reference the hub.
+            var notifications = $.connection.MyHub;
+
+            //debugger;
+            // Create a function that the hub can call to broadcast messages.
+            notifications.client.updateMessages = function () {
+                //console.log("changed");
+                getAllMessages()//將資料庫發生改變時呼叫這個方法
+
+            };
+            // Start the connection.
+            $.connection.hub.start().done(function () {
+                alert("connection started")
+                //notifications.onconn();
+                getAllMessages();
+            }).fail(function (e) {
+                alert(e);
+            });
+        });
+
+        function alterarray() {
+            if (firsttime) {//如果是第一次更改
+                firsttime = false;
+
+            } else {
+                alt_list = lists;
+                lists = [];
+            }
+        }
+
+        function checkarray() {
+            if (alt_list !== lists) {
+                alt_list = lists;
+            }
+        }
+
+        function getlist() {
+            return lists;
+        }
+
+        function getAllMessages() {
+            //var tbl = $('#messagesTable');
+            
+            $.ajax({
+                url: '/Home/GetMessages',
+                contentType: 'application/html ; charset:utf-8',
+                type: 'GET',
+                dataType: 'html',
+                success: function (result) {
+                    //alterarray();
+                    lists.length = 0;//將長度改成0
+                    counter = 0;
+                    console.log("The cleared list:" + lists);
+                    var a2 = JSON.parse(result);
+                    $.each(a2, function (key, value) {
+                        counter++;
+                        lists.push({ id: counter, name: value.itemName, productID: value.itemId, price: value.itemPrice, source: value.itemLocate, count: value.itemCount, total: 0 });
+                    });
+                    //checkarray();
+                    console.log(lists);
+
+
+                }
+
+            });
+        }
+
+        
+        
+        
+    </script>
+
 </head>
 <style>
     table {
@@ -31,34 +110,7 @@
 
 <body>
     <div id="app">
-        <table>
-            <tr>
-                <th>編號</th>
-                <th>產品名稱</th>
-                <th>價格</th>
-                <th>來源</th>
-                <th>數量</th>
-                <th>總價</th>
-                <th></th>
-                <th></th>
-            </tr>
-            <tr v-for="item in itemlist" :key="item.id">
-                <td class="id">{{item.id}}</td>
-                <td class="name">{{item.name}}</td>
-                <td class="price">{{item.price}}</td>
-                <td class="source">{{item.source}}</td>
-                <td class="number">{{item.count}}</td>
-                <td class="total">{{item.total}}</td>
-                <td><button class="add" v-on:click="add(item.id)">+</button></td>
-                <td><button class="minus" v-on:click="reduce(item.id)">-</button></td>
-            </tr>
-        </table>
-        <div class="submit" style="text-align:center">
-            <button v-on:click="addcart()" class="btn btn-primary" style="font-weight:bold;">加入購物車</button>
-            <button v-on:click="emptycart()" class="btn btn-warning" style="font-weight:bold;">清空購物車</button>
-            <button v-on:click="submitcart()" class="btn btn-danger" style="font-weight:bold">購物車送出</button>
-        </div>
-        <div class="cart" style="margin-top:30px;">
+        <section >
             <table>
                 <tr>
                     <th>編號</th>
@@ -68,40 +120,68 @@
                     <th>數量</th>
                     <th>總價</th>
                     <th></th>
+                    <th></th>
                 </tr>
-                <tr v-for="item in cart" :key="item.id">
+                <tr v-for="item in itemlist" :key="item.id">
                     <td class="id">{{item.id}}</td>
                     <td class="name">{{item.name}}</td>
                     <td class="price">{{item.price}}</td>
                     <td class="source">{{item.source}}</td>
                     <td class="number">{{item.count}}</td>
                     <td class="total">{{item.total}}</td>
-                    <td><button v-on:click="deleteitem(item.id)">刪除</button></td>
+                    <td><button class="add" v-on:click="add(item.id)">+</button></td>
+                    <td><button class="minus" v-on:click="reduce(item.id)">-</button></td>
                 </tr>
             </table>
-        </div>
-        <div class="hidden">
-            <form action="Test2_output" method="post" id="form">
-                <input type="hidden" id="hiddendata" name="list" value="" />
-            </form>
+            <div class="submit" style="text-align:center">
+                <button v-on:click="addcart()" class="btn btn-primary" style="font-weight:bold;">加入購物車</button>
+                <button v-on:click="emptycart()" class="btn btn-warning" style="font-weight:bold;">清空購物車</button>
+                <button v-on:click="submitcart()" class="btn btn-danger" style="font-weight:bold">購物車送出</button>
+            </div>
+            <div class="cart" style="margin-top:30px;">
+                <table>
+                    <tr>
+                        <th>編號</th>
+                        <th>產品名稱</th>
+                        <th>價格</th>
+                        <th>來源</th>
+                        <th>數量</th>
+                        <th>總價</th>
+                        <th></th>
+                    </tr>
+                    <tr v-for="item in cart" :key="item.id">
+                        <td class="id">{{item.id}}</td>
+                        <td class="name">{{item.name}}</td>
+                        <td class="price">{{item.price}}</td>
+                        <td class="source">{{item.source}}</td>
+                        <td class="number">{{item.count}}</td>
+                        <td class="total">{{item.total}}</td>
+                        <td><button v-on:click="deleteitem(item.id)">刪除</button></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="hidden">
+                <form action="Test2_output" method="post" id="form">
+                    <input type="hidden" id="hiddendata" name="list" value="" />
+                </form>
 
-        </div>
+            </div>
+
+
+        </section>
+        
     </div>
 </body>
-@{var getlists = ViewBag.getlist;}
-<script>var lists = []; var counter = 0;</script>        
-@foreach (var i in getlists)
-{
-    <script>console.log("@i.productID")</script>
-    <script>counter++;lists.push({ id:counter,name:"@i.name",productID:"@i.productID",price:@i.price,source:"@i.source",count:@i.count,total:0}); </script>
-}
+
+
 <script type="text/javascript">
-
-
+    
+    //const bookcompleted = false;
+    console.log(lists);
     var app = new Vue({
         el: "#app",
         data: {
-            itemlist: lists,
+            itemlist: getlist(),
             cart: []
         }, methods: {
             add: function (id) {
@@ -114,8 +194,6 @@
                     this.itemlist[id - 1].count--;
                     this.itemlist[id - 1].total = this.itemlist[id - 1].total - this.itemlist[id - 1].price;
                 }
-
-
             }, addcart: function () {
                 //console.log(JSON.stringify(this.itemlist));
                 for (var i = 0; i < this.itemlist.length; i++) {
@@ -135,20 +213,15 @@
                                 this.cart.push({ ...this.itemlist[i] });//字典複製
                                 //console.log("222");
                             }
-
                         } else {
                             this.cart.push({ ...this.itemlist[i] });//字典複製
                             //console.log("333");
                         }
-
-
                     }
-
                     this.itemlist[i].count = 0;
                     this.itemlist[i].total = 0;
                 }
                 console.log(JSON.stringify(this.cart));
-
             }, emptycart: function () {
                 this.cart = [];
                 console.log(JSON.stringify(this.cart));
@@ -164,18 +237,10 @@
                 //var senddata = JSON.stringify(this.cart);
                 //document.getElementById("hiddendata").value = senddata;
                 //document.getElementById("form").submit();
-
                 var data = JSON.stringify(this.cart);
                 $.post("/Mysql/Test2_output", { list: data });
-
-
             }
-
-
         }
-
-
-
     });
 
 
